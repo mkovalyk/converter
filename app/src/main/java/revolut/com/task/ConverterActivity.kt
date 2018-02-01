@@ -4,7 +4,9 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.arch.persistence.room.Room
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.util.DiffUtil
 import android.util.Log
 import com.revolut.data.Currency
 import com.revolut.data.CurrencyRepository
@@ -20,25 +22,39 @@ class ConverterActivity : AppCompatActivity() {
     private val model: CurrencyViewModel by lazy {
         ViewModelProviders.of(this).get(CurrencyViewModel::class.java)
     }
-    val currencyAdapter = CurrencyAdapter()
+    private val currencyAdapter = CurrencyAdapter()
+    private val handler: Handler = Handler()
+    private var currentBaseCurrency: Currency = Currency("EUR")
+    private val refresh = Runnable {
+        model.getCurrencies(currentBaseCurrency)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_converter)
         val db = Room.databaseBuilder(applicationContext, RevolutDatabase::class.java, "db").build()
         val retrofit = Retrofit.Builder()
-                .baseUrl("https://api.fixer.io/")
+                .baseUrl("https://revolut.duckdns.org/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
         val service = retrofit.create(CurrencyWebService::class.java)
         model.repository = CurrencyRepository(db.currencyDao(), service)
-        model.getCurrencies(Currency("EUR"))
-        recyclerView.setAdapter(currencyAdapter)
+        model.getCurrencies(currentBaseCurrency)
+        recyclerView.adapter = currencyAdapter
         model.liveData.observe(this, Observer { changed ->
-            Log.d(TAG, "Value is changed: $changed")
-            currencyAdapter.currencies = changed!!
-            currencyAdapter.notifyDataSetChanged()
+            Log.d(TAG, "Value is changed:")
+            val diffResult = DiffUtil.calculateDiff(CurrencyDiffUtil(currencyAdapter.currencies, changed!!))
+            currencyAdapter.currencies = changed
+            diffResult.dispatchUpdatesTo(currencyAdapter)
+            
+            handler.removeCallbacks(refresh)
+            handler.postDelayed(refresh, C.REFRESH_DELAY)
         })
-        button.setOnClickListener { model.getCurrencies(Currency("EUR")) }
+        button.setOnClickListener { model.getCurrencies(currentBaseCurrency) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(refresh)
     }
 }

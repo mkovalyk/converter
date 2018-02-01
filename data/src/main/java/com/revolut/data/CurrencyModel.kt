@@ -34,4 +34,7 @@ class Currency {
         return "Currency(key='$key', name=$name, multiplier=$multiplier)"
     }
 
+    fun contentSame(another: Currency): Boolean {
+        return key == another.key && name == another.name && multiplier == another.multiplier
+    }
 }

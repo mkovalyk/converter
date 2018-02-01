@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import com.revolut.data.Currency
+import java.text.NumberFormat
 
 /**
  * Created on 01.02.18.
@@ -35,6 +36,7 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
         override fun onClick(v: View?) {
         }
     }
+    var nf = NumberFormat.getInstance()
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): CurrencyViewHolder {
         val inflater = LayoutInflater.from(parent?.context)
@@ -60,7 +62,7 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
             name.text = item.key
             count.isEnabled = position == 0
 
-            count.setText(String.format("%.3f", value))
+            count.setText(nf.format(value))
             if (position == 0) {
                 count.addTextChangedListener(listener)
             }
