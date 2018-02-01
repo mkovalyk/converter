@@ -13,8 +13,9 @@ import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
  */
 @Dao
 public interface CurrencyDao {
+    @Query("SELECT * FROM currencies")
+    List<Currency> load();
+
     @Insert(onConflict = REPLACE)
     void save(List<Currency> currencies);
-    @Query("SELECT * FROM currency")
-    List<Currency> load();
 }

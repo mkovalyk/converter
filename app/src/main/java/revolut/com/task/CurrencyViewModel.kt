@@ -4,16 +4,16 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.revolut.data.Currency
 import com.revolut.data.CurrencyRepository
+import kotlinx.coroutines.experimental.runBlocking
 
 /**
  * Created on 27.01.2018.
  */
-class CurrencyViewModel(val repository: CurrencyRepository) : ViewModel() {
+class CurrencyViewModel : ViewModel() {
     val liveData: MutableLiveData<List<Currency>> = MutableLiveData()
+    var repository: CurrencyRepository? = null
 
-
-    fun getCurrencies(baseCurrency:Currency)
-    {
-        liveData.value = repository.getCurrencies(baseCurrency)
+    fun getCurrencies(baseCurrency: Currency) {
+        runBlocking { repository?.getCurrencies(baseCurrency, liveData) }
     }
 }

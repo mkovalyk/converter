@@ -7,17 +7,14 @@ import android.arch.persistence.room.PrimaryKey
 /**
  * Created on 01.02.2018.
  */
-@Entity
-class Currency{
+@Entity(tableName = "currencies")
+class Currency {
     @PrimaryKey
-    val key: String
+    var key: String
     var name: String?
-    var multiplier: Double? = null
+    var multiplier: Double
 
-    constructor() {
-        this.key = ""
-        this.name = ""
-    }
+    constructor() : this("")
 
     @Ignore
     constructor(key: String, name: String, multiplier: Double) {
@@ -25,4 +22,16 @@ class Currency{
         this.name = name
         this.multiplier = multiplier
     }
+
+    @Ignore
+    constructor(key: String) {
+        this.key = key
+        this.name = ""
+        this.multiplier = 1.0
+    }
+
+    override fun toString(): String {
+        return "Currency(key='$key', name=$name, multiplier=$multiplier)"
+    }
+
 }
