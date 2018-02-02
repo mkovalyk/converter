@@ -1,20 +1,17 @@
 package revolut.com.task
 
-import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.revolut.data.Currency
-import com.revolut.data.CurrencyRepository
-import kotlinx.coroutines.experimental.runBlocking
+import com.revolut.data.CurrencyPresenter
 
 /**
  * Created on 27.01.2018.
  */
 class CurrencyViewModel : ViewModel() {
-    val liveData: MutableLiveData<List<Currency>> = MutableLiveData()
-    var repository: CurrencyRepository? = null
+    var presenter: CurrencyPresenter? = null
     var currencyCount: Double? = 0.0
 
     fun getCurrencies(baseCurrency: Currency, loadFromLocal: Boolean) {
-        runBlocking { repository?.getCurrencies(baseCurrency, liveData, loadFromLocal) }
+        presenter?.getCurrencies(baseCurrency, loadFromLocal)
     }
 }

@@ -18,16 +18,15 @@ import java.text.ParseException
  */
 class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>() {
     private val TAG = CurrencyAdapter::class.java.simpleName
-    var currencies: List<Currency> = ArrayList()
+    var currencies: MutableList<Currency> = mutableListOf()
     var enteredValue: Double? = 0.0
+
     val listener = object : LightWeightTextWatcher() {
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             if (!s.isNullOrEmpty()) {
                 try {
-//                    val value = s.toString().toDouble()
                     enteredValue = nf.parse(s.toString()).toDouble()
                     Log.d(TAG, "onTextChanged: $enteredValue")
-//                    enteredValue = value
                     notifyItemRangeChanged(1, itemCount - 1)
                 } catch (nfe: ParseException) {
                     nfe.printStackTrace()
@@ -75,7 +74,7 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
         val item = currencies[position]
         item.value = if (position == 0) enteredValue else item.multiplier * enteredValue!!
         with(holder!!) {
-            Log.d(TAG, "Bind : item. $enteredValue + $item")
+//            Log.d(TAG, "Bind : item. $enteredValue + $item")
             name.text = item.key
             count.tag = item
             parent.tag = item

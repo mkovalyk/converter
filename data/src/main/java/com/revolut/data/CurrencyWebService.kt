@@ -1,6 +1,6 @@
 package com.revolut.data
 
-import retrofit2.Call
+import io.reactivex.Observable
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -9,7 +9,6 @@ import retrofit2.http.Query
  */
 interface CurrencyWebService
 {
-//    https://revolut.duckdns.org/latest?base=EUR
     @GET("latest")
-    fun latestCurrencies(@Query("base") base:String): Call<RemoteCurrency>
+    fun latestCurrencies(@Query("base") base:String): Observable<RemoteCurrency>
 }

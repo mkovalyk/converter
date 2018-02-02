@@ -9,6 +9,6 @@ import java.util.concurrent.TimeUnit
  */
 class C {
     companion object {
-        val REFRESH_DELAY = TimeUnit.SECONDS.toMillis(1)
+        val REFRESH_DELAY = TimeUnit.SECONDS.toMillis(3)
     }
 }
