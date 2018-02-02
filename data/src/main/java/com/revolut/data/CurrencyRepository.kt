@@ -8,9 +8,11 @@ import kotlinx.coroutines.experimental.async
  */
 
 class CurrencyRepository(val dao: CurrencyDao, val service: CurrencyWebService) {
-    suspend fun getCurrencies(base: Currency, data: MutableLiveData<List<Currency>>) {
-        val fromDb = async { dao.load() }
-        data.value = fromDb.await()
+    suspend fun getCurrencies(base: Currency, data: MutableLiveData<List<Currency>>, loadFromLocal: Boolean) {
+        if (loadFromLocal) {
+            val fromDb = async { dao.load() }
+            data.value = fromDb.await()
+        }
         val responce = async {
             val value = service.latestCurrencies(base.key).execute()
             val currencies = value.body().toCurrencyList()

@@ -12,8 +12,9 @@ import kotlinx.coroutines.experimental.runBlocking
 class CurrencyViewModel : ViewModel() {
     val liveData: MutableLiveData<List<Currency>> = MutableLiveData()
     var repository: CurrencyRepository? = null
+    var currencyCount: Double? = 0.0
 
-    fun getCurrencies(baseCurrency: Currency) {
-        runBlocking { repository?.getCurrencies(baseCurrency, liveData) }
+    fun getCurrencies(baseCurrency: Currency, loadFromLocal: Boolean) {
+        runBlocking { repository?.getCurrencies(baseCurrency, liveData, loadFromLocal) }
     }
 }

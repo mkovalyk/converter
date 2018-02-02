@@ -13,6 +13,8 @@ class Currency {
     var key: String
     var name: String?
     var multiplier: Double
+    @Ignore
+    var value: Double? = null
 
     constructor() : this("")
 
@@ -31,7 +33,7 @@ class Currency {
     }
 
     override fun toString(): String {
-        return "Currency(key='$key', name=$name, multiplier=$multiplier)"
+        return "Currency(key='$key', name=$name, multiplier=$multiplier), value=$value"
     }
 
     fun contentSame(another: Currency): Boolean {

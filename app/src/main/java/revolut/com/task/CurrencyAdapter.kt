@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.TextView
 import com.revolut.data.Currency
 import java.text.NumberFormat
+import java.text.ParseException
 
 /**
  * Created on 01.02.18.
@@ -18,22 +19,28 @@ import java.text.NumberFormat
 class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>() {
     private val TAG = CurrencyAdapter::class.java.simpleName
     var currencies: List<Currency> = ArrayList()
-    var enteredValue: Double = 0.0
+    var enteredValue: Double? = 0.0
     val listener = object : LightWeightTextWatcher() {
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             if (!s.isNullOrEmpty()) {
                 try {
-                    val value = s.toString().toDouble()
-                    enteredValue = value
+//                    val value = s.toString().toDouble()
+                    enteredValue = nf.parse(s.toString()).toDouble()
+                    Log.d(TAG, "onTextChanged: $enteredValue")
+//                    enteredValue = value
                     notifyItemRangeChanged(1, itemCount - 1)
-                } catch (nfe: NumberFormatException) {
+                } catch (nfe: ParseException) {
                     nfe.printStackTrace()
                 }
             }
         }
     }
-    val clickListener = object : View.OnClickListener {
-        override fun onClick(v: View?) {
+    val clickListener = View.OnClickListener { v ->
+        val tag = v!!.tag
+        if (tag is Currency) {
+            interactionListener?.itemClicked(tag)
+            enteredValue = tag.value
+            Log.d(TAG, "Click $enteredValue")
         }
     }
     var nf = NumberFormat.getInstance()
@@ -41,7 +48,7 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): CurrencyViewHolder {
         val inflater = LayoutInflater.from(parent?.context)
         val view = inflater.inflate(R.layout.layout_currency_item, parent, false)
-        return CurrencyViewHolder(view)
+        return CurrencyViewHolder(view, clickListener)
     }
 
     override fun onViewRecycled(holder: CurrencyViewHolder?) {
@@ -54,15 +61,25 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
 
     }
 
+    var interactionListener: InteractionListener? = null
+
+    interface InteractionListener {
+        fun itemClicked(item: Currency)
+    }
+
+    override fun getItemId(position: Int): Long {
+        return currencies[position].key.hashCode().toLong()
+    }
+
     override fun onBindViewHolder(holder: CurrencyViewHolder?, position: Int) {
         val item = currencies[position]
-        val value = if (position == 0) enteredValue else enteredValue * item.multiplier
+        item.value = if (position == 0) enteredValue else item.multiplier * enteredValue!!
         with(holder!!) {
-            Log.d(TAG, "Bind at position $position. Value: $item. Count of currency: $enteredValue")
+            Log.d(TAG, "Bind : item. $enteredValue + $item")
             name.text = item.key
-            count.isEnabled = position == 0
-
-            count.setText(nf.format(value))
+            count.tag = item
+            parent.tag = item
+            count.post { count.setText(nf.format(item.value)) }
             if (position == 0) {
                 count.addTextChangedListener(listener)
             }
@@ -76,10 +93,14 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
     inner class CurrencyViewHolder : RecyclerView.ViewHolder {
         val count: EditText
         val name: TextView
+        val parent: ViewGroup
 
-        constructor(view: View) : super(view) {
+        constructor(view: View, listener: View.OnClickListener) : super(view) {
             this.count = view.findViewById(R.id.count)
             this.name = view.findViewById(R.id.name)
+            this.parent = view.findViewById(R.id.parent_layout)
+            parent.setOnClickListener(listener)
+            count.setOnClickListener(listener)
         }
     }
 

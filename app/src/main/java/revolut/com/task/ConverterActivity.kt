@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.util.DiffUtil
-import android.util.Log
 import com.revolut.data.Currency
 import com.revolut.data.CurrencyRepository
 import com.revolut.data.CurrencyWebService
@@ -26,7 +25,7 @@ class ConverterActivity : AppCompatActivity() {
     private val handler: Handler = Handler()
     private var currentBaseCurrency: Currency = Currency("EUR")
     private val refresh = Runnable {
-        model.getCurrencies(currentBaseCurrency)
+        model.getCurrencies(currentBaseCurrency, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,22 +38,32 @@ class ConverterActivity : AppCompatActivity() {
                 .build()
         val service = retrofit.create(CurrencyWebService::class.java)
         model.repository = CurrencyRepository(db.currencyDao(), service)
-        model.getCurrencies(currentBaseCurrency)
+        model.getCurrencies(currentBaseCurrency, true)
+        recyclerView.setHasFixedSize(true)
+        currencyAdapter.setHasStableIds(true)
+        currencyAdapter.enteredValue = model.currencyCount
+        currencyAdapter.interactionListener = object : CurrencyAdapter.InteractionListener {
+            override fun itemClicked(item: Currency) {
+                currentBaseCurrency = item
+                model.getCurrencies(currentBaseCurrency, false)
+                recyclerView.scrollToPosition(0)
+            }
+        }
         recyclerView.adapter = currencyAdapter
         model.liveData.observe(this, Observer { changed ->
-            Log.d(TAG, "Value is changed:")
+            //            Log.d(TAG, "Value is changed:")
             val diffResult = DiffUtil.calculateDiff(CurrencyDiffUtil(currencyAdapter.currencies, changed!!))
             currencyAdapter.currencies = changed
             diffResult.dispatchUpdatesTo(currencyAdapter)
-            
+
             handler.removeCallbacks(refresh)
             handler.postDelayed(refresh, C.REFRESH_DELAY)
         })
-        button.setOnClickListener { model.getCurrencies(currentBaseCurrency) }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        model.currencyCount = currencyAdapter.enteredValue
         handler.removeCallbacks(refresh)
     }
 }
