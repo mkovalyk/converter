@@ -4,10 +4,11 @@ import android.support.v7.util.DiffUtil
 import com.revolut.data.Currency
 
 /**
+ * DiffUtils for Currency
  *
  * Created on 01.02.2018.
  */
-class CurrencyDiffUtil(val old: List<Currency>, val newValues: List<Currency>) : DiffUtil.Callback() {
+class CurrencyDiffUtil(private val old: List<Currency>, private val newValues: List<Currency>) : DiffUtil.Callback() {
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         return old[oldItemPosition].key == newValues[newItemPosition].key
     }

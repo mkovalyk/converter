@@ -3,7 +3,6 @@ package revolut.com.task
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +13,11 @@ import java.text.NumberFormat
 import java.text.ParseException
 
 /**
+ * Adapter for displaying list of the currencies.
+ *
  * Created on 01.02.18.
  */
 class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>() {
-    private val TAG = CurrencyAdapter::class.java.simpleName
     var currencies: MutableList<Currency> = mutableListOf()
     var enteredValue: Double? = 0.0
     var nf = NumberFormat.getInstance()
@@ -35,7 +35,7 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
             if (!s.isNullOrEmpty()) {
                 try {
                     enteredValue = nf.parse(s.toString()).toDouble()
-                    Log.d(TAG, "onTextChanged: $enteredValue")
+                    // update all items except the first one
                     notifyItemRangeChanged(1, itemCount - 1)
                 } catch (nfe: ParseException) {
                     nfe.printStackTrace()
@@ -46,6 +46,8 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
 
     private val clickListener = View.OnClickListener { v ->
         val tag = v!!.tag
+
+        // request focus for item that is selected as base
         val futureBaseView = v.findViewById<EditText>(R.id.count)
         futureBaseView.requestFocus()
         futureBaseView.setSelection(futureBaseView.length())
@@ -53,8 +55,9 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
         if (tag is Currency) {
             interactionListener?.itemClicked(tag)
             enteredValue = tag.value
+
             if (baseCountView != futureBaseView) {
-                Log.d(TAG, "Remove listener from base count view and add to future")
+                // update text watchers
                 baseCountView?.removeTextChangedListener(listener)
                 futureBaseView.addTextChangedListener(listener)
             }
@@ -69,6 +72,7 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
 
     override fun onViewRecycled(holder: CurrencyViewHolder?) {
         with(holder!!) {
+            // remove text watcher in case view is recycled
             if (adapterPosition == 0) {
                 count.removeTextChangedListener(listener)
             }

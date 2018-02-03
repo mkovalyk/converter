@@ -6,6 +6,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 /**
+ * Android implementation of the schedulers factory.
+ *
  * Created on 02.02.2018.
  */
 class AppSchedulesFactory : SchedulersFactory {

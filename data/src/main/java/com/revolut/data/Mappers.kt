@@ -1,6 +1,8 @@
 package com.revolut.data
 
 /**
+ * Class that contains all extension functions for mapping between data models
+ *
  * Created on 01.02.18.
  */
 fun RemoteCurrency?.toCurrencyList(): List<Currency> {

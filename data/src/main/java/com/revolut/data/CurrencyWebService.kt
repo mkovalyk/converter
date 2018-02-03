@@ -5,10 +5,11 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 /**
+ * API service
+ *
  * Created on 01.02.2018.
  */
-interface CurrencyWebService
-{
+interface CurrencyWebService {
     @GET("latest")
-    fun latestCurrencies(@Query("base") base:String): Observable<RemoteCurrency>
+    fun latestCurrencies(@Query("base") base: String): Observable<RemoteCurrency>
 }

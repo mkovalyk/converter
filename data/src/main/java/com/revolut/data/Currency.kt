@@ -32,6 +32,9 @@ class Currency {
         return "Currency(key='$key', name=$name, multiplier=$multiplier), value=$value, position=$position"
     }
 
+    /**
+     * Used for DiffUtils. Indicates whether adapter should be changed.
+     */
     fun contentSame(another: Currency): Boolean {
         return key == another.key && name == another.name && multiplier == another.multiplier
     }

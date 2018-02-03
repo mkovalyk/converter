@@ -1,6 +1,8 @@
 package com.revolut.data
 
 /**
+ * POJO for response from server.
+ *
  * Created on 01.02.2018.
  */
 class RemoteCurrency {

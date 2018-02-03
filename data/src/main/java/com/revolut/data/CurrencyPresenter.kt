@@ -3,6 +3,8 @@ package com.revolut.data
 import io.reactivex.Observable
 
 /**
+ * Class for retrieving currencies from local storage and repository.
+ *
  * Created on 23.01.2018.
  */
 
@@ -30,7 +32,7 @@ class CurrencyPresenter(val dao: CurrencyDao, val service: CurrencyWebService,
     private fun loadFromLocal() {
         view?.loadingStarted()
         Observable.defer {
-            createDelayed(dao.load())
+            createPeriodicEmission(dao.load())
         }
                 .subscribeOn(schedulersFactory.background())
                 .observeOn(schedulersFactory.main())
@@ -42,7 +44,10 @@ class CurrencyPresenter(val dao: CurrencyDao, val service: CurrencyWebService,
                         })
     }
 
-    private fun createDelayed(list: List<Currency>): Observable<Currency> {
+    /**
+     * Creates Observables where each item is emitted after some delay
+     */
+    private fun createPeriodicEmission(list: List<Currency>): Observable<Currency> {
         return Observable.create { emitter ->
             try {
                 for (value in list) {

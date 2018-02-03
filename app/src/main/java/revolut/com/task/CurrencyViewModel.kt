@@ -5,6 +5,8 @@ import com.revolut.data.Currency
 import com.revolut.data.CurrencyPresenter
 
 /**
+ * ViewModel for Currency screen.
+ *
  * Created on 27.01.2018.
  */
 class CurrencyViewModel : ViewModel() {

@@ -3,7 +3,7 @@ package revolut.com.task
 import java.util.concurrent.TimeUnit
 
 /**
- * General class for storing values common for whole app.
+ * General class for storing values used throughout the app.
  *
  * Created on 01.02.2018.
  */
