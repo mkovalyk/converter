@@ -1,6 +1,7 @@
 package com.revolut.data
 
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 
 /**
  * Class for retrieving currencies from local storage and repository.
@@ -11,11 +12,15 @@ import io.reactivex.Observable
 class CurrencyPresenter(val dao: CurrencyDao, val service: CurrencyWebService,
                         val schedulersFactory: SchedulersFactory, var view: CurrencyView?) {
 
+    private var loadFromDatabase: Disposable? = null
+    private var serviceObservable: Disposable? = null
     fun getCurrencies(base: Currency, loadFromLocal: Boolean) {
+        loadFromDatabase.safeDispose()
         if (loadFromLocal) {
             loadFromLocal()
         }
-        service.latestCurrencies(base.key)
+        serviceObservable.safeDispose()
+        serviceObservable = service.latestCurrencies(base.key)
                 .map { remoteCurrency -> remoteCurrency.toCurrencyList() }
                 .doOnNext { currencies ->
                     dao.save(currencies)
@@ -27,6 +32,11 @@ class CurrencyPresenter(val dao: CurrencyDao, val service: CurrencyWebService,
                         { error -> throw error },
                         { loadFromLocal() }
                 )
+    }
+
+    fun destroy() {
+        loadFromDatabase.safeDispose()
+        serviceObservable.safeDispose()
     }
 
     private fun loadFromLocal() {

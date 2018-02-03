@@ -16,4 +16,8 @@ class CurrencyViewModel : ViewModel() {
     fun getCurrencies(baseCurrency: Currency, loadFromLocal: Boolean) {
         presenter?.getCurrencies(baseCurrency, loadFromLocal)
     }
+
+    override fun onCleared() {
+        presenter?.destroy()
+    }
 }
