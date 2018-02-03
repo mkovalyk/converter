@@ -47,6 +47,9 @@ class ConverterActivity : AppCompatActivity() {
         currencyAdapter.enteredValue = model.currencyCount
         currencyAdapter.interactionListener = object : CurrencyAdapter.InteractionListener {
             override fun itemClicked(item: Currency) {
+                if (item == currentBaseCurrency) {
+                    return
+                }
                 currentBaseCurrency = Currency(item.key)
 
                 with(currencyAdapter) {
@@ -57,7 +60,10 @@ class ConverterActivity : AppCompatActivity() {
                         newList[i].multiplier /= item.multiplier
                         when (i) {
                             in 0 until index -> newList[i].position++
-                            index -> newList[i].position = 0
+                            index -> {
+                                newList[i].position = 0
+                                newList[i].multiplier = 1.0
+                            }
                         }
                     }
                     newList.sortBy { it.position }
@@ -97,26 +103,16 @@ class ConverterActivity : AppCompatActivity() {
                     else -> {
                         currencies.add(currency)
                         notifyItemInserted(currencies.size - 1)
-
                     }
-
-                }
-                if (index > 0) {
-                } else {
                 }
             }
             newList.add(currency)
         }
 
         override fun loadingStarted() {
-//            newList = mutableListOf()
         }
 
         override fun loadingCompleted() {
-//            val diffResult = DiffUtil.calculateDiff(CurrencyDiffUtil(currencyAdapter.currencies, newList))
-//            currencyAdapter.currencies = newList
-//            diffResult.dispatchUpdatesTo(currencyAdapter)
-
             handler.removeCallbacks(refresh)
             handler.postDelayed(refresh, C.REFRESH_DELAY)
         }

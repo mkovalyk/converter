@@ -1,6 +1,5 @@
 package com.revolut.data
 
-import android.util.Log
 import io.reactivex.Observable
 
 /**
@@ -18,7 +17,6 @@ class CurrencyPresenter(val dao: CurrencyDao, val service: CurrencyWebService,
                 .map { remoteCurrency -> remoteCurrency.toCurrencyList() }
                 .doOnNext { currencies ->
                     dao.save(currencies)
-                    Log.d("Test", "Before loading ${Thread.currentThread().id}")
                 }
                 .subscribeOn(schedulersFactory.background())
                 .observeOn(schedulersFactory.main())
@@ -32,9 +30,6 @@ class CurrencyPresenter(val dao: CurrencyDao, val service: CurrencyWebService,
     private fun loadFromLocal() {
         view?.loadingStarted()
         Observable.defer {
-            run {
-                Log.d("Test", "Before loading ${Thread.currentThread().id}")
-            }
             createDelayed(dao.load())
         }
                 .subscribeOn(schedulersFactory.background())
@@ -52,7 +47,8 @@ class CurrencyPresenter(val dao: CurrencyDao, val service: CurrencyWebService,
             try {
                 for (value in list) {
                     emitter.onNext(value)
-                    Thread.sleep(50)
+                    //TODO add better evaluation emission delay time
+                    Thread.sleep(16)
                 }
                 emitter.onComplete()
             } catch (ex: Exception) {

@@ -20,8 +20,17 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
     private val TAG = CurrencyAdapter::class.java.simpleName
     var currencies: MutableList<Currency> = mutableListOf()
     var enteredValue: Double? = 0.0
+    var nf = NumberFormat.getInstance()
+    var interactionListener: InteractionListener? = null
+    private var baseCountView: EditText? = null
 
-    val listener = object : LightWeightTextWatcher() {
+    private val listener = object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        }
+
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             if (!s.isNullOrEmpty()) {
                 try {
@@ -34,15 +43,23 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
             }
         }
     }
-    val clickListener = View.OnClickListener { v ->
+
+    private val clickListener = View.OnClickListener { v ->
         val tag = v!!.tag
+        val futureBaseView = v.findViewById<EditText>(R.id.count)
+        futureBaseView.requestFocus()
+        futureBaseView.setSelection(futureBaseView.length())
+
         if (tag is Currency) {
             interactionListener?.itemClicked(tag)
             enteredValue = tag.value
-            Log.d(TAG, "Click $enteredValue")
+            if (baseCountView != futureBaseView) {
+                Log.d(TAG, "Remove listener from base count view and add to future")
+                baseCountView?.removeTextChangedListener(listener)
+                futureBaseView.addTextChangedListener(listener)
+            }
         }
     }
-    var nf = NumberFormat.getInstance()
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): CurrencyViewHolder {
         val inflater = LayoutInflater.from(parent?.context)
@@ -57,13 +74,6 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
             }
         }
         super.onViewRecycled(holder)
-
-    }
-
-    var interactionListener: InteractionListener? = null
-
-    interface InteractionListener {
-        fun itemClicked(item: Currency)
     }
 
     override fun getItemId(position: Int): Long {
@@ -74,13 +84,13 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
         val item = currencies[position]
         item.value = if (position == 0) enteredValue else item.multiplier * enteredValue!!
         with(holder!!) {
-//            Log.d(TAG, "Bind : item. $enteredValue + $item")
             name.text = item.key
             count.tag = item
             parent.tag = item
             count.post { count.setText(nf.format(item.value)) }
             if (position == 0) {
                 count.addTextChangedListener(listener)
+                baseCountView = count
             }
         }
     }
@@ -89,25 +99,19 @@ class CurrencyAdapter : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>
         return currencies.size
     }
 
-    inner class CurrencyViewHolder : RecyclerView.ViewHolder {
-        val count: EditText
-        val name: TextView
-        val parent: ViewGroup
+    inner class CurrencyViewHolder(view: View, listener: View.OnClickListener) : RecyclerView.ViewHolder(view) {
+        val count: EditText = view.findViewById(R.id.count)
+        val name: TextView = view.findViewById(R.id.name)
+        val parent: ViewGroup = view.findViewById(R.id.parent_layout)
 
-        constructor(view: View, listener: View.OnClickListener) : super(view) {
-            this.count = view.findViewById(R.id.count)
-            this.name = view.findViewById(R.id.name)
-            this.parent = view.findViewById(R.id.parent_layout)
+        init {
             parent.setOnClickListener(listener)
             count.setOnClickListener(listener)
         }
+
     }
 
-    inner abstract class LightWeightTextWatcher : TextWatcher {
-        override fun afterTextChanged(s: Editable?) {
-        }
-
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-        }
+    interface InteractionListener {
+        fun itemClicked(item: Currency)
     }
 }
